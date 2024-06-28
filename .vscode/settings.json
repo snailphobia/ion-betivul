@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "*.docx": "xml",
-        "asoundlib.h": "c",
-        "stdio.h": "c"
-    }
-}
