@@ -1,4 +1,5 @@
 #include <alsa/asoundlib.h>
+#include <alsa/pcm.h>
 #include <stdio.h>
 
 #include "utils.h"
@@ -6,7 +7,7 @@
 #define PCM_DEVICE "default"
 
 
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
     unsigned int pcm, tmp, dir;
     int rate, channels, format;
@@ -24,13 +25,16 @@ int main(int argc, char *argv[])
 
     /* Open the PCM device in playback mode */
     if (pcm = snd_pcm_open(&pcm_handle, PCM_DEVICE,
-                SND_PCM_STREAM_PLAYBACK, 0) < 0) 
+                SND_PCM_STREAM_PLAYBACK, 0) < 0)
         printf("ERROR: Can't open \"%s\" PCM device. %s\n",
                 PCM_DEVICE , snd_strerror(pcm));
 
     /* Allocate parameters object and fill it with default values*/
     snd_pcm_hw_params_alloca(&params);
     snd_pcm_hw_params_any(pcm_handle, params);
+
+    // set nonblocking writei
+    snd_pcm_nonblock(pcm_handle, 1);
 
     /* Set parameters */
     FILE *file = fopen(argv[1], "r");
@@ -63,7 +67,7 @@ int main(int argc, char *argv[])
 
     /* Allocate buffer to hold single period */
     snd_pcm_hw_params_get_period_size(params, &frames, 0);
-    printf("frames: %d\n", (int)frames); 
+    printf("frames: %d\n", (int)frames);
 
     buff_size = frames * channels * header->bits_per_sample / 8; /* 2 -> sample size */;
     buff = (char *) malloc(buff_size);
@@ -80,7 +84,7 @@ int main(int argc, char *argv[])
     printf("starting playback now: buffer size is %d\n", buff_size);
 
     lseek(readfd, 128, SEEK_SET);
-    // while((readval = read(readfd, buff, buff_size)) > 0) {      
+    // while((readval = read(readfd, buff, buff_size)) > 0) {
     //     if ((pcm = snd_pcm_writei(pcm_handle, buff, frames)) == -EPIPE) {
     //             // fprintf(stderr, "Underrun!\n");
     //             snd_pcm_prepare(pcm_handle);
@@ -96,7 +100,7 @@ int main(int argc, char *argv[])
     loop_async(buff, buff_size, frames, pcm_handle);
 
     snd_pcm_drain(pcm_handle);
-    
+
     printf("ended playback.\n");
     snd_pcm_close(pcm_handle);
     free(buff);
