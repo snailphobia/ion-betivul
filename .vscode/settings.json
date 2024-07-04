@@ -2,6 +2,7 @@
     "files.associations": {
         "*.docx": "xml",
         "asoundlib.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "utils.h": "c"
     }
 }

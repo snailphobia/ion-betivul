@@ -8,6 +8,39 @@ wav_header* read_wav_header(FILE *file) {
     return header;
 }
 
+void src_sound_cards(void) {
+    int card_num = -1;
+    int err;
+    snd_ctl_t *handle = NULL;
+
+    while (1) {
+        err = snd_card_next(&card_num);
+        if (err < 0) {
+            printf("Error: %s\n", snd_strerror(err));
+            break;
+        }
+        if (card_num < 0)
+            break;
+        printf("card num %d///", card_num);
+
+        char name[32];
+        sprintf(name, "hw:%d", card_num);
+        if ((err = snd_ctl_open(&handle, name, 0)) < 0) {
+            printf("Error: %s\n", snd_strerror(err));
+            continue;
+        }
+
+        snd_ctl_card_info_t *card_info;
+        snd_ctl_card_info_alloca(&card_info);
+        if ((err = snd_ctl_card_info(handle, card_info)) < 0) {
+            printf("Error: %s\n", snd_strerror(err));
+            continue;
+        }
+        printf("Card %d: %s\n", card_num, snd_ctl_card_info_get_name(card_info));
+        snd_ctl_close(handle);
+    }
+}
+
 void set_params_from_wav_header(snd_pcm_hw_params_t *params, wav_header *header, snd_pcm_t *pcm_handle) {
     unsigned int rate = header->sample_rate;
     snd_pcm_hw_params_set_access(pcm_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);

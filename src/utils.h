@@ -31,6 +31,7 @@ typedef enum {
 } signal_snd;
 
 wav_header* read_wav_header(FILE *file);
+void src_sound_cards(void);
 void set_params_from_wav_header(snd_pcm_hw_params_t *params, wav_header *header, snd_pcm_t *pcm_handle);
 signal_snd parse_async_input();
 void set_fds(int* ref);

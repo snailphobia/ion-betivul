@@ -6,7 +6,7 @@
 
 #define PCM_DEVICE "default"
 
-#define PCM_DEVICE_2 "plughw:1,0"
+#define PCM_DEVICE_2 "default"
 
 
 int main(int argc, char *argv[])
@@ -20,23 +20,38 @@ int main(int argc, char *argv[])
     int buff_size;
     int readfd, readval = 0;
 
+    src_sound_cards();
     if (argc < 2) {
-        printf("Usage: %s <wav_file>\n", argv[0]);
+        printf("Usage: %s <wav_file> <opt:card number> <opt:device number>\n", argv[0]);
         return -1;
     }
+    int opt_card = 0, opt_device = 0;
+    const char device[7];
 
-    /* Open the PCM device in playback mode */
-    if (pcm = snd_pcm_open(&pcm_handle, PCM_DEVICE_2,
-                SND_PCM_STREAM_PLAYBACK, 0) < 0)
-        printf("ERROR: Can't open \"%s\" PCM device. %s\n",
-                PCM_DEVICE_2 , snd_strerror(pcm));
+    if (argc >= 3)
+        opt_card = atoi(argv[2]);
+    if (argc == 4)
+        opt_device = atoi(argv[3]);
+    snprintf(device, 7, "hw:%d,%d", opt_card, opt_device);
+
+    if (opt_card != 0 || opt_device != 0) {
+        /* Open the PCM device in playback mode */
+        if (pcm = snd_pcm_open(&pcm_handle, device,
+                    SND_PCM_STREAM_PLAYBACK, 0) < 0)
+            printf("ERROR: Can't open \"%s\" PCM device. %s\n",
+                    device, snd_strerror(pcm));
+    } else
+        if (pcm = snd_pcm_open(&pcm_handle, PCM_DEVICE,
+                    SND_PCM_STREAM_PLAYBACK, 0) < 0)
+            printf("ERROR: Can't open \"%s\" PCM device. %s\n",
+                    PCM_DEVICE, snd_strerror(pcm));    
 
     /* Allocate parameters object and fill it with default values*/
     snd_pcm_hw_params_alloca(&params);
     snd_pcm_hw_params_any(pcm_handle, params);
 
-    // set nonblocking writei
-    snd_pcm_nonblock(pcm_handle, 1);
+    // // set nonblocking writei
+    // snd_pcm_nonblock(pcm_handle, 1);
 
     /* Set parameters */
     FILE *file = fopen(argv[1], "r");
