@@ -6,6 +6,8 @@
 
 #define PCM_DEVICE "default"
 
+#define PCM_DEVICE_2 "plughw:1,0"
+
 
 int main(int argc, char *argv[])
 {
@@ -24,10 +26,10 @@ int main(int argc, char *argv[])
     }
 
     /* Open the PCM device in playback mode */
-    if (pcm = snd_pcm_open(&pcm_handle, PCM_DEVICE,
+    if (pcm = snd_pcm_open(&pcm_handle, PCM_DEVICE_2,
                 SND_PCM_STREAM_PLAYBACK, 0) < 0)
         printf("ERROR: Can't open \"%s\" PCM device. %s\n",
-                PCM_DEVICE , snd_strerror(pcm));
+                PCM_DEVICE_2 , snd_strerror(pcm));
 
     /* Allocate parameters object and fill it with default values*/
     snd_pcm_hw_params_alloca(&params);
